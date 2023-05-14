@@ -1,0 +1,156 @@
+{% extends "network/layout.html" %}
+
+{% load static %}
+
+{% block title %} Job application | Social Network {% endblock %}
+{% block head %}
+<style>
+            .job-application {
+              display: flex;
+              flex-direction: column;
+              align-items: flex-start;
+              margin-top: 90px;
+              margin-left: 20px;
+              margin-right: 20px;
+              padding: 20px;
+              background-color: #f5f5f5;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+            }
+
+            .job-application label {
+              font-weight: bold;
+            }
+
+            .job-application__input,
+            .job-application__textarea {
+              padding: 5px;
+              margin-bottom: 10px;
+              border: 1px solid #ccc;
+              border-radius: 3px;
+              width: 100%;
+              resize: none;
+            }
+
+            .job-application__file-input {
+              margin-bottom: 10px;
+            }
+
+            .job-application__submit-button {
+              padding: 10px;
+              border-radius: 3px;
+              background-color: #007bff;
+              color: #fff;
+              border: none;
+              cursor: pointer;
+            }
+
+            .job-application__submit-button:hover {
+              background-color: #0069d9;
+            }
+
+            .job-application__submit-button:active {
+              background-color: #005cbf;
+            }
+
+</style>
+<script>
+    function validatePDF(fileInput) {
+      const allowedExtensions = /(\.pdf)$/i;
+      const fileSizeLimit = 5 * 1024 * 1024; // 5 MB in bytes
+
+      const file = fileInput.files[0];
+
+      // Check if the file is a PDF
+      if (!allowedExtensions.exec(file.name)) {
+        fileInput.value = "";
+        document.querySelector(".resume-error").textContent = "Error: Please upload a PDF file.";
+        return false;
+      }
+
+      // Check if the file size is within limit
+      if (file.size > fileSizeLimit) {
+        fileInput.value = "";
+        document.querySelector(".resume-error").textContent = "Error: File size exceeds 5 MB limit.";
+        return false;
+      }
+
+      // No errors, clear any previous error messages
+      document.querySelector(".resume-error").textContent = "";
+      return true;
+    }
+    function validatePhoneNumber(phoneInput) {
+      const phoneNumberPattern = /^\d{10}$/; // Match a 10-digit phone number
+
+      // Remove any non-digit characters from the input
+      const phoneNumber = phoneInput.value.replace(/\D/g, "");
+
+      // Check if the phone number matches the pattern
+      if (!phoneNumberPattern.test(phoneNumber)) {
+        document.querySelector(".phone-error").textContent = "Error: Please enter a valid 10-digit phone number.";
+        return false;
+      }
+
+      // No errors, clear any previous error messages
+      document.querySelector(".phone-error").textContent = "";
+      return true;
+    }
+</script>
+{% endblock %}
+{% block body %}
+    <div class="main-div">
+        <div class="left-div">
+            <nav class="head heading">
+                {% if page == 'all_posts' %}
+                    <h3>All Posts</h3>
+                {% elif page == 'following' %}
+                    <h3>Following</h3>
+                {% elif page == 'userjobs' %}
+                    <h3>Job Application</h3>
+                {% elif page == 'saved' %}
+                    <h3>Saved</h3>
+                {% elif page == 'profile' %}
+                    <h3>Profile</h3>
+                {% else %}
+                    <h3>Explore</h3>
+                {% endif %}
+            </nav>
+            <div class="left-div-content">
+                <div class="posts-view">
+                    {% block profile %}
+                    {% endblock %}
+                    <div class="main-div-content">
+                        <form class="job-application" method="POST" enctype="multipart/form-data">
+                          {% csrf_token %}
+                          <input type="hidden" name="job_posting" value="{{ job_posting.jid }}">
+                          <label for="name">Name:</label>
+                          <input class="job-application__input" type="text" name="name" value="{{ user.first_name }} {{ user.last_name }}" required>
+                          <label for="email">Email:</label>
+                          <input class="job-application__input" type="email" name="email" value="{{ user.email }}" required>
+                          <label for="phone">Phone:</label>
+                          <input class="job-application__input" type="text" name="phone" required autocomplete="off" onkeyup="validatePhoneNumber(this)">
+                          <small class="phone-error" style="color: red"></small>
+                          <label for="resume">Resume(PDF Max size:5MB):</label>
+                          <input class="job-application__file-input" type="file" name="resume" accept=".pdf" required onchange="validatePDF(this)">
+                          <small class="resume-error" style="color: red"></small>
+                          {% if resume_error %}
+                            <small style="color: red">{{ resume_error }}</small>
+                          {% endif %}
+                          <label for="cover_letter">Cover Letter:</label>
+                          <textarea class="job-application__textarea" name="cover_letter" required></textarea>
+                          <input class="job-application__submit-button" type="submit" value="Submit">
+                        </form>
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+{% endblock %}

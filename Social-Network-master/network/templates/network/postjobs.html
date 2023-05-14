@@ -1,0 +1,215 @@
+{% extends "network/layout.html" %}
+
+{% load static %}
+
+{% block title %} Post Jobs | Social Network {% endblock %}
+
+{% block head %}
+        <style>
+
+            ul {
+              list-style: none;
+            }
+            .job-buttons {
+              display: flex;
+              justify-content: flex-end;
+              margin-top: 10px;
+            }
+
+            .job-buttons button {
+              margin-left: 10px;
+            }
+
+            .job-card {
+              background-color: white;
+              border-radius: 10px;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+              padding: 2rem;
+              margin-top: 20px;
+              margin-bottom: 2rem;
+              width: 96% !important;
+            }
+
+            .job-card h3 {
+              font-size: 2rem;
+              margin-bottom: 0.5rem;
+            }
+
+            .job-card a {
+              text-decoration: none;
+              color: black;
+            }
+
+            .job-card p.company-location {
+              font-size: 1.5rem;
+              margin-top: 1rem;
+              margin-bottom: 0.5rem;
+            }
+
+            .job-card:hover {
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25), 0 1px 1px rgba(0, 0, 0, 0.22);
+                transform: translateY(-1px);
+            }
+
+            #search {
+              border: 2px solid #ccc; /* Add a gray border */
+              border-radius: 4px; /* Rounded corners */
+              font-size: 16px; /* Set font size */
+              padding: 10px 20px; /* Add some padding */
+              width: 840px; /* Set a fixed width */
+              margin-top: 20px; /* Add a margin to the top */
+              margin-left: 32px; /* Add a margin to the left */
+            }
+
+            /* Style for the placeholder text */
+            ::placeholder {
+              color: #999; /* Add a light gray color */
+              font-style: italic; /* Make it italic */
+            }
+        </style>
+{% endblock %}
+
+
+{% block body %}
+    <div class="main-div">
+        <div class="left-div">
+            <nav class="head heading">
+                {% if page == 'all_posts' %}
+                    <h3>All Posts</h3>
+                {% elif page == 'following' %}
+                    <h3>Following</h3>
+                {% elif page == 'postjobs' %}
+                    <h3>Post Jobs</h3>
+                {% elif page == 'saved' %}
+                    <h3>Saved</h3>
+                {% elif page == 'profile' %}
+                    <h3>Profile</h3>
+                {% else %}
+                    <h3>Explore</h3>
+                {% endif %}
+            </nav>
+            <div class="left-div-content">
+                <div class="posts-view">
+                    {% block profile %}
+                    {% endblock %}
+                    <div class="main-div-content">
+                            <button type="button" class="btn btn-success new-post-btn mt-4 ml-4" data-toggle="modal" data-target="#exampleModalCenter">
+                              Post Job
+                            </button>
+
+                            <!-- Modal -->
+                                <div class="modal" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                  <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLongTitle"><b>Post Jobs</b></h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                        </button>
+                                      </div>
+                                      <div class="modal-body">
+
+                                          <form method="POST" action="jobposting">
+                                                  {% csrf_token %}
+                                                  <h5 class="modal-title">Title</h5>
+                                                  <input type="text" name="title" class="form-control mb-3" required >
+                                                  <h5 class="modal-title">Location</h5>
+                                                  <input type="text" name="location" class="form-control mb-3" required >
+                                                  <h5 class="modal-title">Description</h5>
+                                                  <input type="text" name="description" class="form-control mb-3" required >
+                                                  <h5 class="modal-title">Qualification</h5>
+                                                  <input type="text" name="qualifications" class="form-control mb-3" required >
+                                                  <h5 class="modal-title">Requirements</h5>
+                                                  <input type="text" name="requirements" class="form-control mb-3" required >
+                                                  <h5 class="modal-title">Responsibilities</h5>
+                                                  <input type="text" name="responsibilities" class="form-control mb-3" required >
+                                                  <h5 class="modal-title">Website</h5>
+                                                  <input type="text" name="website" class="form-control mb-3" required >
+                                                  <h5 class="modal-title">Salary</h5>
+                                                  <input type="text" name="salary" class="form-control mb-3" required >
+
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="submit" class="btn btn-success new-post-btn">Submit</button>
+                                          </form>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                    <div>
+                                        <ul class="mx-auto">
+                                                  {% for job in jobs %}
+                                                    <li class="job-card">
+                                                        {% if user.is_authenticated %}
+                                                            <div class="small-profilepic" style="background-image: url(/media/{{user.profile_pic}})"></div>
+                                                        {% endif %}
+                                                      <h3>{{ job.title }}</h3>
+                                                      <p class="company-location">@{{ job.company }} - {{ job.location }}</p>
+                                                        <div class="job-buttons">
+                                                            <a href="#" data-bs-toggle="modal" data-bs-target="#EditModal-{{ job.jid }}">
+                                                              <button class="btn btn-primary">Edit</button>
+                                                            </a>
+                                                            <form action="{% url 'job_delete' job.pk %}" method="POST">
+                                                              {% csrf_token %}
+                                                              <button class="btn btn-danger" type="submit">Delete</button>
+                                                            </form>
+                                                            <a href="{% url 'jobapplicants' job.pk %}">
+                                                                <button class="btn btn-success">View Applications</button>
+                                                            </a>
+                                                        </div>
+                                                    </li>
+
+                                            <!--- Edit modal --->
+                                             <div class="modal fade" id="EditModal-{{ job.jid }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                                              <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                  <div class="modal-header">
+                                                      <h5 class="modal-title" id="EditModalLabel"><b>Edit Job Details</b></h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                                    </button>
+                                                  </div>
+                                                  <div class="modal-body">
+                                                      <form method="POST" action="{% url 'job_edit' job.pk %}">
+
+                                                          {% csrf_token %}
+                                                          <h5 class="modal-title">Title</h5>
+                                                          <input type="text" name="title" value="{{ job.title }}" class="form-control mb-3" required >
+                                                          <h5 class="modal-title">Location</h5>
+                                                          <input type="text" name="location" value="{{ job.location }}" class="form-control mb-3" required >
+                                                          <h5 class="modal-title">Description</h5>
+                                                          <input type="text" name="description" value="{{ job.description }}" class="form-control mb-3" required >
+                                                          <h5 class="modal-title">Qualification</h5>
+                                                          <input type="text" name="qualifications" value="{{ job.qualifications }}" class="form-control mb-3" required >
+                                                          <h5 class="modal-title">Requirements</h5>
+                                                          <input type="text" name="requirements" value="{{ job.requirements }}" class="form-control mb-3" required >
+                                                          <h5 class="modal-title">Responsibilities</h5>
+                                                          <input type="text" name="responsibilities" value="{{ job.responsibilities }}" class="form-control mb-3" required >
+                                                          <h5 class="modal-title">Website</h5>
+                                                          <input type="text" name="website" value="{{ job.website }}" class="form-control mb-3" required >
+                                                          <h5 class="modal-title">Salary</h5>
+                                                          <input type="text" name="salary" value="{{ job.salary }}" class="form-control mb-3" required >
+                                                  </div>
+                                                  <div class="modal-footer">
+                                                      <button type="submit" class="btn btn-primary">Submit</button>
+                                                  </div>
+                                                    </form>
+                                                </div>
+                                              </div>
+                                            </div>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+{% endblock %}
