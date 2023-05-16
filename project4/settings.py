@@ -12,9 +12,11 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 from .juzmin import JAZZMIN_SETTINGS
+from pathlib import Path
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -42,6 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -117,11 +120,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'network/media')
 MEDIA_URL = '/media/'
 
-STRIPE_SECRET_KEY = 'sk_test_51My9o7SF3bcVwtOeMkgJuKMnZiN8SvuYdUG1sg9Wo62cJ87gBu4k7qnQhBAWC7FwYu87xr9VwmjNcXBhA4GdrurU00izcB9Adb'
-STRIPE_PUBLISHABLE_KEY = 'pk_test_51My9o7SF3bcVwtOe2ozKYnHGYWnFcnlYSSIGTAZQOqOTKkTO141CuyJEaCO26TxlXSHN4lho0zaZEjbBgSIQ5oCS00allyI2At'
+
 
 JAZZMIN_SETTINGS["show_ui_builder"] = True
 
